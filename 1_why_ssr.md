@@ -5,3 +5,7 @@ request for html file -> request for js file -> json request -> content viable
 vs ssrs:
 
 content request -> content viable
+
+## SSR downsides
+
+ssr is computation heavy and this is one of the reasons we want to split the front and backend
