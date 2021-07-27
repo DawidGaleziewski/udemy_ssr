@@ -9,7 +9,7 @@ const renderToString = require("react-dom/server").renderToString;
 const Home = require("./client/components/Home").default;
 
 app.get("/", (req, res) => {
-  // We will be useing ReacDOM library to change react component into html
+  // We will be useing ReacDOM library to change react component into html. We will need however to use webpack to translate it
   const content = renderToString(<Home />);
 
   res.send(content);
