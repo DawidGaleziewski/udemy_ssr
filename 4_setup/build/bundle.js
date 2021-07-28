@@ -7063,11 +7063,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // Under the hood this is still require as this is node.js code. But we modify it by using webpack
 var app = (0, _express2.default)();
 
+// Inform express that public folder should be used as static. It shoudl be available to outide world
+app.use(_express2.default.static("public"));
+
 app.get("/", function (req, res) {
   // We will be useing ReacDOM library to change react component into html. We will need however to use webpack to translate it
   var content = (0, _server.renderToString)(_react2.default.createElement(_Home2.default, null));
-
-  res.send(content);
+  // We create a html template. Inside we interpolate the content (our react code) and add a js bundle on the bottom with all js.
+  var html = "<html>\n      <head>\n      </head>\n      <body>\n        <div id=\"root\">" + content + "</div>\n        <script src=\"bundle.js\"></script>\n      </body>\n    </html>";
+  res.send(html);
 });
 
 app.listen(3000, function () {
