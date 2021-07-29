@@ -91,7 +91,7 @@ var app = (0, _express2.default)();
 
 app.use(_express2.default.static("public"));
 
-app.get("/", function (req, res) {
+app.get("*", function (req, res) {
   // we pass the request to the router so that it knows what route was requested from the browser and what to render
   res.send((0, _renderer2.default)(req));
 });
@@ -221,7 +221,14 @@ exports.default = function () {
   return _react2.default.createElement(
     "div",
     null,
-    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: "/", component: _Home2.default })
+    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: "/", component: _Home2.default }),
+    _react2.default.createElement(_reactRouterDom.Route, { path: "/test", component: function component() {
+        return _react2.default.createElement(
+          "div",
+          null,
+          "Hii"
+        );
+      } })
   );
 }; // Shared by both client and server side code base
 // Div contains only routes, those will be imported to client.js and index.js

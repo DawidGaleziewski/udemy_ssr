@@ -23850,7 +23850,14 @@ exports.default = function () {
   return _react2.default.createElement(
     "div",
     null,
-    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: "/", component: _Home2.default })
+    _react2.default.createElement(_reactRouterDom.Route, { exact: true, path: "/", component: _Home2.default }),
+    _react2.default.createElement(_reactRouterDom.Route, { path: "/test", component: function component() {
+        return _react2.default.createElement(
+          "div",
+          null,
+          "Hii"
+        );
+      } })
   );
 }; // Shared by both client and server side code base
 // Div contains only routes, those will be imported to client.js and index.js
