@@ -27,8 +27,12 @@ function mapStateToProps(state) {
   return { users: state.users };
 }
 
-function loadData() {
-  console.log("Trying to load some data");
+function loadData(store) {
+  console.log(`store is: ${store}`);
+
+  // We can call dispatch on the store object
+  // We return the promise created during dispatch so that we know when it gets resolved in index.js
+  return store.dispatch(fetchUsers());
 }
 
 export { loadData };

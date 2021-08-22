@@ -17,13 +17,19 @@ app.get("*", (req, res) => {
   // return array of components that will be rendered
   const components = matchRoutes(Routes, req.path);
 
-  components.map(({ route }) => {
+  const promises = components.map(({ route }) => {
     // Load data on a route if it exists if it does start the function
-    return route.loadData ? route.loadData() : null;
+    // We pass the store to load data functions. Thanks to this our loadData functtions will have referance to our store
+    return route.loadData ? route.loadData(store) : null;
   });
 
-  // Store will be passed to renderer
-  res.send(renderer(req, store));
+  // Promise.all takes all promises and returns one new.
+  Promise.all(promises).then(() => {
+    // Once our data is resolved we can continue
+
+    // Store will be passed to renderer
+    res.send(renderer(req, store));
+  });
 });
 
 app.listen(3000, () => {
