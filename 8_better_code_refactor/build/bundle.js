@@ -80,33 +80,23 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Home = __webpack_require__(12);
+var _HomePage = __webpack_require__(19);
 
-var _Home2 = _interopRequireDefault(_Home);
+var _HomePage2 = _interopRequireDefault(_HomePage);
 
-var _UsersList = __webpack_require__(13);
+var _UsersListPage = __webpack_require__(20);
 
-var _UsersList2 = _interopRequireDefault(_UsersList);
+var _UsersListPage2 = _interopRequireDefault(_UsersListPage);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// We say bye bye to our clean code
-// export default () => {
-//   return (
-//     <div>
-//       <Route exact path="/" component={Home} />
-//       <Route path="/test" component={() => <div>Hii</div>} />
-//       <Route path="/users" component={UsersList} />
-//     </div>
-//   );
-// };
-
-// Hello to ssr code
-exports.default = [{ path: "/", component: _Home2.default, exact: true }, { path: "/users", component: _UsersList2.default, loadData: _UsersList.loadData }];
+exports.default = [_extends({}, _HomePage2.default, { path: "/", exact: true }), _extends({}, _UsersListPage2.default, { path: "/users" })];
 
 /***/ }),
 /* 2 */
@@ -213,31 +203,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var app = (0, _express2.default)();
 
-// Fpr checking components in route
-
 
 app.use(_express2.default.static("public"));
 
 app.get("*", function (req, res) {
-  // We start working with store before renderer function.
   var store = (0, _createStore2.default)();
-
-  // return array of components that will be rendered
   var components = (0, _reactRouterConfig.matchRoutes)(_Routes2.default, req.path);
-
   var promises = components.map(function (_ref) {
     var route = _ref.route;
 
-    // Load data on a route if it exists if it does start the function
-    // We pass the store to load data functions. Thanks to this our loadData functtions will have referance to our store
     return route.loadData ? route.loadData(store) : null;
   });
 
-  // Promise.all takes all promises and returns one new.
   Promise.all(promises).then(function () {
-    // Once our data is resolved we can continue
-
-    // Store will be passed to renderer
     res.send((0, _renderer2.default)(req, store));
   });
 });
@@ -301,7 +279,7 @@ exports.default = function (req, store) {
       )
     )
   ));
-  return "<html>\n          <head>\n          </head>\n          <body>\n            <div id=\"root\">" + content + "</div>\n            <script src=\"bundle.js\"></script>\n          </body>\n        </html>";
+  return "<html>\n          <head>\n          </head>\n          <body>\n            <div id=\"root\">" + content + "</div>\n            <script>\n              window.INITIAL_STATE = " + JSON.stringify(store.getState()) + "\n            </script>\n            <script src=\"bundle.js\"></script>\n          </body>\n        </html>";
 };
 
 /***/ }),
@@ -317,7 +295,98 @@ module.exports = require("react-dom/server");
 module.exports = require("react-router");
 
 /***/ }),
-/* 12 */
+/* 12 */,
+/* 13 */,
+/* 14 */
+/***/ (function(module, exports) {
+
+module.exports = require("axios");
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _redux = __webpack_require__(5);
+
+var _reduxThunk = __webpack_require__(16);
+
+var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
+
+var _reducers = __webpack_require__(17);
+
+var _reducers2 = _interopRequireDefault(_reducers);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function () {
+  var store = (0, _redux.createStore)(_reducers2.default, {}, (0, _redux.applyMiddleware)(_reduxThunk2.default));
+
+  return store;
+};
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
+
+module.exports = require("redux-thunk");
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _redux = __webpack_require__(5);
+
+var _usersReducer = __webpack_require__(18);
+
+var _usersReducer2 = _interopRequireDefault(_usersReducer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = (0, _redux.combineReducers)({
+  users: _usersReducer2.default
+});
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _actions = __webpack_require__(3);
+
+exports.default = function () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+  var action = arguments[1];
+
+  switch (action.type) {
+    case _actions.FETCH_USERS:
+      return action.payload.data;
+    default:
+      return state;
+  }
+};
+
+/***/ }),
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -354,10 +423,10 @@ var Home = function Home() {
   );
 };
 
-exports.default = Home;
+exports.default = { component: Home };
 
 /***/ }),
-/* 13 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -435,105 +504,13 @@ function mapStateToProps(state) {
 }
 
 function loadData(store) {
-  console.log("store is: " + store);
-
-  // We can call dispatch on the store object
-  // We return the promise created during dispatch so that we know when it gets resolved in index.js
   return store.dispatch((0, _actions.fetchUsers)());
 }
 
 exports.loadData = loadData;
-exports.default = (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList);
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports) {
-
-module.exports = require("axios");
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _redux = __webpack_require__(5);
-
-var _reduxThunk = __webpack_require__(16);
-
-var _reduxThunk2 = _interopRequireDefault(_reduxThunk);
-
-var _reducers = __webpack_require__(17);
-
-var _reducers2 = _interopRequireDefault(_reducers);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function () {
-  var store = (0, _redux.createStore)(_reducers2.default, {}, (0, _redux.applyMiddleware)(_reduxThunk2.default));
-
-  return store;
-};
-
-// We do not import provider! Sole purpose of this file is to create store
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports) {
-
-module.exports = require("redux-thunk");
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _redux = __webpack_require__(5);
-
-var _usersReducer = __webpack_require__(18);
-
-var _usersReducer2 = _interopRequireDefault(_usersReducer);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = (0, _redux.combineReducers)({
-  users: _usersReducer2.default
-});
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _actions = __webpack_require__(3);
-
-exports.default = function () {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
-  var action = arguments[1];
-
-  switch (action.type) {
-    case _actions.FETCH_USERS:
-      return action.payload.data;
-    default:
-      return state;
-  }
+exports.default = {
+  loadData: loadData,
+  component: (0, _reactRedux.connect)(mapStateToProps, { fetchUsers: _actions.fetchUsers })(UsersList)
 };
 
 /***/ })
