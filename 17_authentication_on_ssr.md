@@ -18,3 +18,92 @@ When browser sends a request for the page initially, we will have to check for a
 ## Why not JWT?
 
 We would need to do a flollow request to the browser from the server to get the jwt token. As the jwt cant be send in cookie only in request header.
+
+## proxy setup
+
+in our express we want to proxy all requests to our backend
+
+```javascript
+app.use(express.static("public"));
+
+app.use("/api", proxy("http://react-ssr-api.herokuapp.com"));
+```
+
+## moving cookie to api call
+
+when we recive a api call from a browser to renderer, we want to take that cookie and use it in our request from the renderer to the api itself
+
+but we do not want the cookie to be cjanged on the client.
+
+Therefore we want the axios to behave diffrently depending on if it was invoked on client or the server
+
+## modify thunk
+
+we will use a thunk 3rd argument. We will pass a instance of axios to it that will behave diffrently on server and diffrently on browser
+
+This will help us do requests without worring about things like cookies
+
+setup on client:
+
+```javascript
+// Prepend each request with /api. This requests will be proxied by express.
+const axiosInstance = axios.create({
+  baseURL: "/api",
+});
+
+// We pacc axios instance to thunk
+const store = createStore(
+  reducers,
+  window.INITIAL_STATE,
+  applyMiddleware(thunk.withExtraArgument(axiosInstance))
+);
+```
+
+In our actions
+
+```js
+// We recive new axios instance now. Called api here
+export const fetchUsers = () => async (dispatch, getState, api) => {
+  const res = await api.get("http://react-ssr-api.herokuapp.com/users");
+
+  dispatch({
+    type: FETCH_USERS,
+    payload: res,
+  });
+};
+```
+
+On the server. We need to add cookie to request and pass it to the api
+
+in /index.js we will need to pass each request to our create store function
+
+```js
+app.get("*", (req, res) => {
+  // We pass request to the create store to be used to extract cookies
+  const store = createStore(req);
+```
+
+in /createStore
+
+```js
+export default (req) => {
+  const axiosInstance = axios.create({
+    baseURL: "http://react-ssr-api.herokuapp.com",
+    headers: {
+      // sometimes users will make request without a cookie. and we never want to have a undefined header. This would crash the request
+      // This tricks api to thinking the call was made by the user
+      cookie: req.get("cookie") || "",
+    },
+  });
+
+  const store = createStore(
+    reducers,
+    {},
+    applyMiddleware(thunk.withExtraArgument(axiosInstance))
+  );
+
+  return store;
+};
+```
+
+IMPORTANT whenever we want to make a call that is outside of the api we need to make call by importing axios to the action
