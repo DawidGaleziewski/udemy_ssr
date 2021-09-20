@@ -107,3 +107,25 @@ export default (req) => {
 ```
 
 IMPORTANT whenever we want to make a call that is outside of the api we need to make call by importing axios to the action
+
+## figure out if user is authenticated
+
+we will hit the /current_user path to check if the user is authenticated
+
+as we want to check everytime if user is authenticated we want to run it from App.js
+
+## oauth
+
+we wauth by redirecting to google with a href as we do not want the request to be redirected
+
+```js
+const authButton = auth ? (
+  <a href="/api/logout">Logout</a>
+) : (
+  <a href="/api/auth/google">Login</a>
+);
+```
+
+this will proxy the request to the api by the server
+
+request is proxied browser -> server -> google api
