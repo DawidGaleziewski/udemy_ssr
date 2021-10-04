@@ -46,6 +46,11 @@ app.get("*", (req, res) => {
     // Context object we are passing down
     const content = renderer(req, store, context);
 
+    // We check for a url on context. If it exists the rediract was fires on server side and we want to handle it by sending 301 (redirect) action to the user
+    if (context.url) {
+      return res.redirect(301, context.url);
+    }
+
     // If a error was set from our notFound page, we want to attach a 404
     if (context.notFound) {
       res.status(404);
